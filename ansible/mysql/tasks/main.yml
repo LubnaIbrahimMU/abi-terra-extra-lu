@@ -1,0 +1,101 @@
+---
+# tasks file for mysql
+
+
+- name: apt update
+  apt:
+    update_cache: yes
+
+- name: Ensure python MySQL package is installed
+  package:
+    name: python3-mysqldb
+    state: present
+  when: ansible_distribution == 'Ubuntu'
+
+
+
+- name: Ensure python MySQL package is installed
+  package:
+    name: MySQL-python
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+
+
+- name: Install MySQL 8
+  apt:
+    name: mysql-server-{{ mysql_version }}
+    state: present
+
+- name: Start MySQL service
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+
+
+
+- name: Create .my.cnf file
+  template:
+    src: my.cnf.j2
+    dest: ~/.my.cnf
+    owner: root
+    group: root
+    mode: '0600'
+  notify: Restart MySQL
+
+
+
+
+
+- name: Removes anonymous user account for localhost
+  mysql_user:
+    name: ''
+    host: localhost
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    state: absent
+    column_case_sensitive: false 
+    login_unix_socket: /run/mysqld/mysqld.sock
+
+- name: Removes all anonymous user accounts
+  mysql_user:
+    name: ''
+    host_all: true
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    state: absent
+    column_case_sensitive: false 
+
+
+
+- name: Create MySQL database
+  mysql_db:
+    name: "{{ mysql_database }}"
+    state: present
+
+- name: Create database user with name 
+  mysql_user:
+    name: "{{ mysql_user }}"
+    password: "{{ mysql_pass }}"
+    priv: '{{ mysql_database }}.*:ALL'
+    state: present
+    column_case_sensitive: false 
+
+
+
+- name: Copy 
+  template:
+    src: backup_script.sh.j2
+    dest: ~/backup_script.sh.j2
+
+- name: Create daily backup cron job
+  cron:
+    name: "mysql_backup"
+    minute: 0
+    hour: 1
+    job: "~/backup_script.sh.j2"
+    state: present
+    
+  

@@ -1,0 +1,8 @@
+---
+# defaults file for mysql
+mysql_version: "8.0"
+mysql_root_password: pass@123#
+mysql_user: lu
+mysql_pass: pass@123
+mysql_database: wordpressapp
+# ansible_hostname: localhost

@@ -1,0 +1,100 @@
+---
+# tasks file for wordpress
+
+- name: apt update
+  apt:
+    update_cache: yes
+   
+
+
+
+- name: Install Apache2
+  apt:
+    name: apache2
+    state: present
+
+
+- name: Ensure Apache service is running and enabled
+  service:
+    name: apache2
+    state: started
+    enabled: yes
+
+
+
+- name: Install PHP and required modules
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - php
+    - libapache2-mod-php
+    - php-mysql
+    - php-curl
+    - php-gd
+    - php-mbstring
+    - php-xml
+    - php-xmlrpc
+    - php-soap
+    - php-intl
+    - php-zip
+
+
+
+# - name: Clone WordPress repository
+#   git:
+#     repo: "{{ wordpress_repo_url }}"
+#     dest:  "{{ wordpress_install_dir }}"
+#     force: yes
+#     update: no  # Set to yes if you want to update an existing clone
+
+
+# - name: Copy
+#   shell:
+#     cmd: cp -r /tmp/wordpress/. /var/www/html/wordpress/
+#   register: ls_output
+ 
+
+
+
+
+- name: Download and extract WordPress
+  unarchive:
+    src: "https://wordpress.org/latest.tar.gz"
+    dest: /var/www/html/
+    remote_src: yes
+    creates: /var/www/html/wordpress/
+
+- name: Set ownership and permissions for WordPress
+  file:
+    path: /var/www/html/wordpress/
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Configure Apache2 virtual host for WordPress
+  template:
+    src: wordpress.conf.j2
+    dest: /etc/apache2/sites-available/wordpress.conf
+  notify: Restart Apache2
+
+- name: Configure WordPress wp-config.php
+  template:
+    src: wp-config.php.j2
+    dest: /var/www/html/wordpress/wp-config.php
+    owner: www-data
+
+
+
+
+- name: Enable the WordPress virtual host
+  command: a2ensite wordpress.conf
+  notify: Restart Apache2
+
+- name: Disable the default Apache2 virtual host
+  command: a2dissite 000-default.conf
+  notify: Restart Apache2
+
+- name: Ensure Apache2 mod_rewrite is enabled
+  command: a2enmod rewrite
+  notify: Restart Apache2

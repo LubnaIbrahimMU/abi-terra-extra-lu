@@ -1,0 +1,30 @@
+---
+
+
+- name: install-mysql
+  hosts: lu-ab
+  remote_user: ubuntu
+  become: yes
+  roles:
+   - mysql
+  tags: 
+    - mysql
+    - install
+
+
+
+- name: install-wordpress 
+  hosts: lu-ab
+  remote_user: ubuntu
+  become: yes
+  roles:
+   - wordpress
+  tags:
+    - wordpress
+    - install
+
+
+
+
+
+

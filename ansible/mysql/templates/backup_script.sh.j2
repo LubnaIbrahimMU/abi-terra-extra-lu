@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Set backup directory
+backup_dir="/var/backups/mysql"
+
+# Create backup directory if it doesn't exist
+mkdir -p $backup_dir
+
+# Set backup filename
+backup_file="$backup_dir/all-databases-$(date +%Y-%m-%d-%H-%M-%S).sql"
+
+# MySQL credentials
+mysql_user="root"
+mysql_password="{{ mysql_root_password }}"
+
+# Dump all databases
+mysqldump -u $mysql_user -p$mysql_password --all-databases > $backup_file
+
+# Compress the backup
+gzip $backup_file
