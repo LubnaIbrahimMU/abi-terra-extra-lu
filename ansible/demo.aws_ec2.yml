@@ -1,11 +1,11 @@
-plugin: amazon.aws.aws_ec2
-regions:
-  - us-east-1
-filters:
-  tag:Name: Terraform-Instance-*
-keyed_groups:
-  - key: tags.Name
-hostnames:
-  - public-ip-address
-compose:
-  ansible_host: public-ip-address
+# plugin: amazon.aws.aws_ec2
+# regions:
+#   - us-east-1
+# filters:
+#   tag:Name: Terraform-Instance-*
+# keyed_groups:
+#   - key: tags.Name
+# hostnames:
+#   - public-ip-address
+# compose:
+#   ansible_host: public-ip-address
